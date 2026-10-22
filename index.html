@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Kwitansi Pembayaran - Yayasan Pendidikan HAS Darul Ilmi</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="locked">
+
+  <!-- ===== Halaman login ===== -->
+  <div class="login noprint">
+    <div class="lbox">
+      <div style="display:flex;gap:10px;align-items:center">
+        <div class="logo">🧾</div>
+        <div>
+          <b style="font-size:18px">Kwitansi<span style="color:#0284c7">HDI</span></b>
+          <div style="font-size:11px;opacity:.7">Yayasan HAS Darul Ilmi</div>
+        </div>
+      </div>
+      <h2 id="lt" style="margin:6px 0 0;font-size:20px"></h2>
+      <p id="lh" style="margin:0;font-size:13px;opacity:.75"></p>
+      <label>Email<input id="lu" type="email" autocomplete="username"></label>
+      <label>Password
+        <div class="pw">
+          <input id="lp" type="password" autocomplete="current-password">
+          <button type="button" class="eye" id="eye" onclick="togglePw()" aria-label="Tampilkan password">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z" />
+              <circle cx="12" cy="12" r="3" />
+              <path d="M3 3l18 18" />
+            </svg>
+          </button>
+        </div>
+      </label>
+      <label id="lp2w">Ulangi password<input id="lp2" type="password" autocomplete="new-password"></label>
+      <p id="le" class="err"></p>
+      <button id="lb" onclick="doLogin()"></button>
+    </div>
+  </div>
+
+  <!-- ===== Aplikasi kasir ===== -->
+  <div class="app">
+
+    <!-- Sidebar -->
+    <aside class="side noprint">
+      <div class="brand">
+        <div class="logo">🧾</div>
+        <div>
+          <b>Kwitansi<span>HDI</span></b>
+          <small>Sistem Kasir Yayasan</small>
+        </div>
+      </div>
+      <nav>
+        <a id="n1" class="on" tabindex="0" role="button" onclick="go('pos')" onkeydown="if(event.key=='Enter')go('pos')">Kasir (Kwitansi)</a>
+        <a id="n2" tabindex="0" role="button" onclick="go('prod')" onkeydown="if(event.key=='Enter')go('prod')">Manajemen Produk</a>
+        <a id="n3" tabindex="0" role="button" onclick="go('nama')" onkeydown="if(event.key=='Enter')go('nama')">Manajemen Nama</a>
+      </nav>
+      <div class="sf">
+        <b>Yayasan HAS Darul Ilmi</b>
+        <small>Jl. Cidurian Utara No.179, Bandung</small>
+        <button class="pay2" style="color:#e2e8f0;border-color:#334155" onclick="logout()">Keluar</button>
+      </div>
+    </aside>
+
+    <!-- Konten utama -->
+    <main class="main noprint">
+      <header class="top">
+        <h1><span id="ttl">Halaman Kasir</span> <span class="badge">● Kasir Aktif</span></h1>
+        <div class="clock" id="clock"></div>
+      </header>
+
+      <!-- Kasir: pilih produk -->
+      <div id="pos">
+        <div class="tools">
+          <input id="cari" type="search" placeholder="Cari produk...">
+          <div class="chips" id="chips"></div>
+        </div>
+        <div class="cards" id="cards"></div>
+      </div>
+
+      <!-- Manajemen produk -->
+      <section id="prod">
+        <div class="phead">
+          <div>
+            <h2>Daftar Produk Toko</h2>
+            <p>Kelola stok, harga, dan kategori produk Anda di sini.</p>
+          </div>
+          <button onclick="openMod(-1)">+ Tambah Produk Baru</button>
+        </div>
+        <div class="chips" id="pchips" style="margin-bottom:14px"></div>
+        <div class="ptab">
+          <table>
+            <thead>
+              <tr>
+                <th>Produk</th>
+                <th>Kelas</th>
+                <th>Harga</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="ptb"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Manajemen nama penerima -->
+      <section id="nama">
+        <div class="phead">
+          <div>
+            <h2>Daftar Nama Penerima</h2>
+            <p>Kelola nama yang muncul di pilihan "Telah terima dari".</p>
+          </div>
+          <button onclick="openName(-1)">+ Tambah Nama Baru</button>
+        </div>
+        <div class="chips" id="nchips" style="margin-bottom:14px"></div>
+        <div class="ptab">
+          <table>
+            <thead>
+              <tr>
+                <th>Nama</th>
+                <th>Kelas</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="ntb"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <!-- Keranjang belanja -->
+    <aside class="cart noprint">
+      <div class="ch">
+        <h2>Keranjang Belanja</h2>
+        <button class="lnk" onclick="clearCart()">Kosongkan</button>
+      </div>
+      <div class="cb">
+        <div id="items"></div>
+        <details class="data" open>
+          <summary>Data kwitansi</summary>
+          <label>Telah terima dari<select id="kls"></select></label>
+          <label id="dw"><input id="dari" value="ARSYAKAYLA RENJANA MAEZUMA 12" placeholder="Ketik nama" aria-label="Nama penerima"></label>
+          <label>Tanggal<input id="tgl" type="date"></label>
+          <label>Kota<input id="kota" value="Bandung"></label>
+          <label>Penerima / Petugas<input id="ttd" value="Herni"></label>
+          <label>Catatan<input id="cat" placeholder="Opsional"></label>
+        </details>
+      </div>
+      <div class="cf">
+        <div class="tr"><span>Subtotal</span><b id="sub">Rp 0</b></div>
+        <div class="tr"><span>Diskon (Rp) <input id="disc" class="mini" type="number" min="0" placeholder="0"></span><b id="dv">- Rp 0</b></div>
+        <div class="tr big"><span>Total Bayar</span><b id="gt">Rp 0</b></div>
+        <button class="pay" onclick="openPay()">Proses Pembayaran</button>
+        <button class="pay2" onclick="showReceipt(true)">Tampilan Kwitansi</button>
+      </div>
+    </aside>
+
+    <!-- ===== Modal ===== -->
+
+    <!-- Modal pembayaran -->
+    <div id="pmod" class="mod noprint">
+      <div class="pbox">
+        <div class="ph">
+          <span>🧾 Pembayaran Transaksi</span>
+          <button class="px" onclick="closePay()" aria-label="Tutup">×</button>
+        </div>
+        <div class="pb">
+          <div class="tg">
+            <small>Total Tagihan</small>
+            <div id="gt2">Rp 0</div>
+          </div>
+          <div class="pl">METODE PEMBAYARAN</div>
+          <div class="mc">
+            <button class="mm on" data-m="Tunai" onclick="setMet('Tunai')"><span>💵</span>Tunai</button>
+            <button class="mm" data-m="QRIS / E-Wallet" onclick="setMet('QRIS / E-Wallet')"><span>📱</span>QRIS / E-Wallet</button>
+            <button class="mm" data-m="Kartu Debit/Kredit" onclick="setMet('Kartu Debit/Kredit')"><span>💳</span>Kartu Debit/Kredit</button>
+          </div>
+          <div class="pl">UANG DITERIMA (RP)</div>
+          <input id="bayar" type="number" min="0" placeholder="Masukkan jumlah uang...">
+          <div class="pq">
+            <button id="q1" onclick="qb(0)">Rp 0</button>
+            <button onclick="qb(50000)">Rp 50.000</button>
+            <button onclick="qb(100000)">Rp 100.000</button>
+          </div>
+          <div class="kbr"><span id="kbl">Kembalian:</span><b id="kb">Rp 0</b></div>
+          <p id="pe" class="err"></p>
+          <button class="fin" onclick="finishPay()">✔ Selesaikan Transaksi</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal tambah / edit nama -->
+    <div id="nmod" class="mod noprint">
+      <div class="mbox">
+        <h2 id="nt" style="margin:0;font-size:17px">Tambah Nama Baru</h2>
+        <label>Nama penerima<input id="nn" oninput="up(this)" style="text-transform:uppercase" placeholder="Contoh: ARSYAKAYLA RENJANA MAEZUMA"></label>
+        <label>Kelas<select id="nk"></select></label>
+        <p id="ne" class="err"></p>
+        <div class="mb">
+          <button class="pay2" style="margin:0" onclick="closeName()">Batal</button>
+          <button onclick="saveName()">Simpan</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal konfirmasi hapus -->
+    <div id="dmod" class="mod noprint">
+      <div class="mbox">
+        <h2 id="dtt" style="margin:0;font-size:17px">Hapus Produk?</h2>
+        <p style="margin:0;font-size:14px">Yakin ingin menghapus <b id="dn"></b>? Tindakan ini tidak bisa dibatalkan.</p>
+        <div class="mb">
+          <button class="pay2" style="margin:0" onclick="closeDel()">Batal</button>
+          <button class="dng" onclick="confirmDel()">Ya, Hapus</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal tambah / edit produk -->
+    <div id="mod" class="mod noprint">
+      <div class="mbox">
+        <h2 id="mt" style="margin:0;font-size:17px"></h2>
+        <label>Nama produk<input id="mn"></label>
+        <label>Kelas (opsional)<select id="mc"></select></label>
+        <label>Harga (Rp)<input id="mh" type="number" min="0"></label>
+        <label>Ikon (emoji)<input id="mi" maxlength="4"></label>
+        <p id="me" class="err"></p>
+        <div class="mb">
+          <button class="pay2" style="margin:0" onclick="closeMod()">Batal</button>
+          <button onclick="saveMod()">Simpan</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== Pratinjau & cetak kwitansi ===== -->
+    <div id="out" class="off">
+      <div class="noprint bar">
+        <button onclick="window.print()">Cetak sekarang</button>
+        <button class="ghost" onclick="showReceipt(false)">Tutup</button>
+      </div>
+      <div class="scroll">
+        <div class="paper">
+          <div class="in">
+
+            <!-- Kop surat -->
+            <div class="head">
+              <img src="logo.png" width="95" height="95" alt="Logo HDI" style="object-fit:contain">
+              <div>
+                <h1>YAYASAN PENDIDIKAN<br>HAS DARUL ILMI</h1>
+                <p>Jl. Cidurian Utara No.179 Sukapura - Kiaracondong</p>
+                <p>Telp. 022-7315421 Hp. 081395044476</p>
+              </div>
+              <img src="logo.png" width="95" height="95" alt="Logo HDI" style="object-fit:contain;justify-self:end">
+            </div>
+
+            <div class="line"><span class="lb">Telah terima dari</span>:<span class="v" id="pDari"></span></div>
+
+            <!-- Rincian pembayaran -->
+            <table>
+              <thead>
+                <tr>
+                  <th style="width:60px;text-align:left">No</th>
+                  <th>Keterangan Pembayaran</th>
+                  <th style="text-align:right;width:190px">Jumlah</th>
+                </tr>
+              </thead>
+              <tbody id="pRows"></tbody>
+            </table>
+
+            <!-- Total & terbilang -->
+            <div class="tot">
+              <div class="t">Terbilang :<div class="nol" id="pTerb"></div>
+              </div>
+              <div class="tt">
+                <b>Total :</b>
+                <div class="m"><span>Rp.</span><span id="pTot"></span></div>
+              </div>
+            </div>
+
+            <!-- Metode pembayaran (tampil setelah transaksi selesai) -->
+            <div class="rpay" id="pPay" style="display:none">
+              <div class="rm">Metode Pembayaran : <b id="pMet"></b></div>
+              <div class="rb">
+                <div><span>Dibayar :</span>
+                  <div class="m"><span>Rp.</span><span id="pBy"></span></div>
+                </div>
+                <div><span id="pKbl">Kembalian :</span>
+                  <div class="m"><span>Rp.</span><span id="pKb"></span></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Catatan, kota & tanggal -->
+            <div class="crow">
+              <div class="cat">
+                <div>Catatan :</div>
+                <div class="nol" id="pCat"></div>
+              </div>
+              <div class="sign">
+                <div>
+                  <div class="d"><span id="pKota"></span><span id="pTgl"></span></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tanda tangan petugas -->
+            <div class="sign">
+              <div>
+                <div class="ttd" id="pTtd"></div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script src="script.js"></script>
+</body>
+
+</html>
